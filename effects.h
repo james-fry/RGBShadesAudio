@@ -6,6 +6,837 @@
 //    * All animation should be controlled with counters and effectDelay, no delay() or loops
 //    * Pixel data should be written using leds[XY(x,y)] to map coordinates to the RGB Shades layout
 
+void torch() {
+  // startup tasks
+  if (effectInit == false) {
+    effectInit = true;
+    effectDelay = 5;
+    fadingActive = true;
+  }
+
+  injectRandom();
+  calcNextEnergy();
+  calcNextColors();
+  return 1;
+}
+
+// RotatingPlasma
+void radiate() {
+  static byte offset  = 0; // counter for radial color wave motion
+  static int plasVector = 0; // counter for orbiting plasma center
+
+  // startup tasks
+  if (effectInit == false) {
+    effectInit = true;
+    effectDelay = 10;
+    selectRandomPalette();
+    fadingActive = true;
+  }
+  // Calculate current center of plasma pattern (can be offscreen)
+  //int xOffset = (cos8(plasVector)-127)/2;
+  //int yOffset = (sin8(plasVector)-127)/2;
+
+  int xOffset = 0;
+  int yOffset = 4;
+
+  // Draw one frame of the animation into the LED array
+  for (int x = 0; x < kMatrixWidth; x++) {
+    for (int y = 0; y < kMatrixHeight; y++) {
+      byte color = sin8(sqrt(sq(((float)x - 7.5) * 12 + xOffset) + sq(((float)y - 2) * 12 + yOffset)) + offset);
+      leds[XY(x, y)] = ColorFromPalette(currentPalette, color, 255);
+    }
+  }
+  offset++; // wraps at 255 for sin8
+  plasVector += 1; // using an int for slower orbit (wraps at 65536)
+}
+
+// RotatingPlasma
+void radiate2() {
+
+  static byte offset  = 0; // counter for radial color wave motion
+  static int plasVector = 4; // counter for orbiting plasma center
+
+  // startup tasks
+  if (effectInit == false) {
+    effectInit = true;
+    effectDelay = 10;
+    selectRandomPalette();
+    fadingActive = true;
+  }
+
+  // Calculate current center of plasma pattern (can be offscreen)
+  int xOffset = (cos8(plasVector) - 127) / 2;
+  int yOffset = 0;
+
+  //int xOffset = (cos8(plasVector)-127)/2;
+  //int yOffset = (sin8(plasVector)-127)/2;
+
+  //int xOffset = 0;
+  //int yOffset = 0;
+
+  // Draw one frame of the animation into the LED array
+  for (int x = 0; x < kMatrixWidth; x++) {
+    for (int y = 0; y < kMatrixHeight; y++) {
+      byte color = sin8(sqrt(sq(((float)x - 7.5) * 12 + xOffset) + sq(((float)y - 2) * 12 + yOffset)) + offset);
+      leds[XY(x, y)] = ColorFromPalette(currentPalette, color, 255);
+    }
+  }
+  offset++; // wraps at 255 for sin8
+  plasVector += 1; // using an int for slower orbit (wraps at 65536)
+}
+
+// RotatingPlasma
+void spinPlasma() {
+
+  static byte offset  = 0; // counter for radial color wave motion
+  static int plasVector = 0; // counter for orbiting plasma center
+
+  // startup tasks
+  if (effectInit == false) {
+    effectInit = true;
+    effectDelay = 10;
+    selectRandomPalette();
+    fadingActive = true;
+  }
+
+  // Calculate current center of plasma pattern (can be offscreen)
+  int xOffset = (cos8(plasVector) - 127) / 2;
+  int yOffset = (sin8(plasVector) - 127) / 2;
+
+  //int xOffset = 0;
+  //int yOffset = 0;
+
+  // Draw one frame of the animation into the LED array
+  for (int x = 0; x < kMatrixWidth; x++) {
+    for (int y = 0; y < kMatrixHeight; y++) {
+      byte color = sin8(sqrt(sq(((float)x - 7.5) * 12 + xOffset) + sq(((float)y - 2) * 12 + yOffset)) + offset);
+      leds[XY(x, y)] = ColorFromPalette(currentPalette, color, 255);
+    }
+  }
+  offset++; // wraps at 255 for sin8
+  plasVector += 1; // using an int for slower orbit (wraps at 65536)
+}
+
+// Crossfading alternate colors
+DEFINE_GRADIENT_PALETTE( checkermap_gp) {
+  0,   0,   0,  0,
+  63, 255,   0,  0,
+  127,   0,   0,  0,
+  191,   0, 255,  0,
+  255,   0,   0,  0
+};
+
+void checkerboard() {
+  static byte checkerFader = 0;
+
+  // startup tasks
+  if (effectInit == false) {
+    effectInit = true;
+    effectDelay = 10;
+    currentPalette = checkermap_gp;
+    // currentPalette = RainbowColors_p;
+    fadingActive = true;
+  }
+
+  checkerFader += 2;
+
+  CRGB colorOne = ColorFromPalette(currentPalette, checkerFader);
+  CRGB colorTwo = ColorFromPalette(currentPalette, checkerFader + 64);
+
+  for (byte x = 0; x < kMatrixWidth; x++) {
+    for (byte y = 0; y < kMatrixHeight; y++) {
+      leds[XY(x, y)] = (((x % 2) + y) % 2) ? colorOne : colorTwo;
+    }
+  }
+}
+
+// Hue Rotation
+void colorRotation() {
+
+  // startup tasks
+  if (effectInit == false) {
+    effectInit = true;
+    effectDelay = 60;
+    fadingActive = true;
+  }
+
+  fillAll(CHSV(cycleHue, 255, 255));
+}
+
+
+void blueSnake() {
+
+  static int mx = 0;
+  static int lx = 0;
+
+  // startup tasks
+  if (effectInit == false) {
+    effectInit = true;
+    fadingActive = true;
+    fillAll(CRGB::Black);
+
+    // Reset corner LEDs to red
+    leds[0] = CRGB::Red;
+    leds[29] = CRGB::Red;
+    leds[30] = CRGB::Red;
+    leds[57] = CRGB::Red;
+    leds[58] = CRGB::Red;
+    leds[13] = CRGB::Red;
+    leds[14] = CRGB::Red;
+    leds[43] = CRGB::Red;
+    leds[44] = CRGB::Red;
+    leds[67] = CRGB::Red;
+
+    // Reset counter
+    mx = 0;
+    lx = 0;
+
+    // Effektens hastighet
+    effectDelay = 20;
+  }
+
+  if (mx <= 67) {
+    leds[mx].r = 0;
+    leds[mx].g = 0;
+    leds[mx].b = 255;
+    mx++;
+  }
+  if (mx == 68) {
+    if (lx <= 67) {
+      leds[lx] = CRGB::Black;
+      lx++;
+    }
+    if (lx == 68) {
+      // Reset all
+      effectInit = false;
+    }
+  }
+}
+
+
+// Draw slanting bars scrolling across the array, uses current hue
+void slantBars2() {
+
+  static byte slantPos = 0;
+
+  // startup tasks
+  if (effectInit == false) {
+    effectInit = true;
+    effectDelay = 5;
+    fadingActive = true;
+  }
+
+  for (byte x = 0; x < kMatrixWidth; x++) {
+    for (byte y = 0; y < kMatrixHeight; y++) {
+      leds[XY(x, y)] = CHSV(cycleHue, 255, quadwave8(x * 64 + y * 64 + slantPos));
+    }
+  }
+
+  slantPos -= 2;
+}
+
+void bpm() {
+  bool gReverseDirection = false;
+  // startup tasks
+  if (effectInit == false) {
+    effectInit = true;
+    effectDelay = 0;
+    fadingActive = true;
+  }
+
+  uint8_t gHue = 120;
+  // colored stripes pulsing at a defined Beats-Per-Minute (BPM)
+  uint8_t BeatsPerMinute = 45;
+  CRGBPalette16 palette = RainbowColors_p;
+  uint8_t beat = beatsin8( BeatsPerMinute, 64, 255);
+
+  for ( int i = 0; i < NUM_LEDS; i++) {
+    leds[i] = ColorFromPalette(palette, gHue + (i * 2), beat - gHue + (i * 10));
+
+    int pixelnumber;
+
+    if ( gReverseDirection ) {
+      pixelnumber = (NUM_LEDS - 1) - i;
+    } else {
+      pixelnumber = i;
+    }
+    leds[pixelnumber] = ColorFromPalette(palette, gHue + (i * 2), beat - gHue + (i * 10));
+  }
+  //  byte scrollY = 0;
+  //  for (byte y = 0; y < kMatrixHeight; y++) {
+  //    if (scrollDir == 0) {
+  //      scrollY = kMatrixHeight - y;
+  //    } else if (scrollDir == 1) {
+  //      scrollY = y;
+  //    }
+  //
+  //    for (byte x = 0; x < kMatrixWidth; x++) {
+  //      leds[XY(x, scrollY)] = leds[XY(x, scrollY + scrollDir * 2 - 1)];
+  //    }
+  //  }
+}
+
+
+void redBorder() {
+
+  // startup tasks
+  if (effectInit == false) {
+    effectInit = true;
+    fillAll(CRGB::Black);
+    effectDelay = 50;
+    fadingActive = true;
+  }
+  // leds[ XY(13,2) ] == CRGB::Red;
+
+  leds[0] = CRGB::Red;
+  leds[1] = CRGB::Red;
+  leds[2] = CRGB::Red;
+  leds[3] = CRGB::Red;
+  leds[4] = CRGB::Red;
+  leds[5] = CRGB::Red;
+  leds[6] = CRGB::Red;
+  leds[7] = CRGB::Red;
+  leds[8] = CRGB::Red;
+  leds[9] = CRGB::Red;
+  leds[10] = CRGB::Red;
+  leds[11] = CRGB::Red;
+  leds[12] = CRGB::Red;
+  leds[13] = CRGB::Red;
+  leds[16] = CRGB::Red;
+  leds[18] = CRGB::Red;
+  leds[41] = CRGB::Red;
+  leds[39] = CRGB::Red;
+  leds[20] = CRGB::Red;
+  leds[48] = CRGB::Red;
+  leds[46] = CRGB::Red;
+  leds[25] = CRGB::Red;
+  leds[37] = CRGB::Red;
+  leds[50] = CRGB::Red;
+  leds[67] = CRGB::Red;
+  leds[66] = CRGB::Red;
+  leds[65] = CRGB::Red;
+  leds[64] = CRGB::Red;
+  leds[63] = CRGB::Red;
+  leds[50] = CRGB::Red;
+  leds[23] = CRGB::Red;
+  leds[27] = CRGB::Red;
+  leds[29] = CRGB::Red;
+  leds[30] = CRGB::Red;
+  leds[32] = CRGB::Red;
+  leds[34] = CRGB::Red;
+  leds[36] = CRGB::Red;
+  leds[51] = CRGB::Red;
+  leds[53] = CRGB::Red;
+  leds[55] = CRGB::Red;
+  leds[57] = CRGB::Red;
+  leds[58] = CRGB::Red;
+  leds[59] = CRGB::Red;
+  leds[60] = CRGB::Red;
+  leds[61] = CRGB::Red;
+  leds[62] = CRGB::Red;
+  leds[14] = CRGB::Red;
+  leds[43] = CRGB::Red;
+  leds[44] = CRGB::Red;
+  leds[67] = CRGB::Red;
+}
+
+void redBorder2() {
+  // startup tasks
+  if (effectInit == false) {
+    effectInit = true;
+    fillAll(CRGB::Black);
+    effectDelay = 50;
+    fadingActive = true;
+  }
+  // leds[ XY(13,2) ] == CRGB::Red;
+  leds[0] = CRGB::Red;
+  leds[1] = CRGB::Red;
+  leds[2] = CRGB::Red;
+  leds[3] = CRGB::Red;
+  leds[4] = CRGB::Red;
+  leds[5] = CRGB::Red;
+  leds[6] = CRGB::Red;
+  leds[7] = CRGB::Red;
+  leds[8] = CRGB::Red;
+  leds[9] = CRGB::Red;
+  leds[10] = CRGB::Red;
+  leds[11] = CRGB::Red;
+  leds[12] = CRGB::Red;
+  leds[13] = CRGB::Red;
+  leds[21] = CRGB::Red;
+  leds[22] = CRGB::Red;
+  leds[37] = CRGB::Red;
+  leds[50] = CRGB::Red;
+  leds[67] = CRGB::Red;
+  leds[66] = CRGB::Red;
+  leds[65] = CRGB::Red;
+  leds[64] = CRGB::Red;
+  leds[63] = CRGB::Red;
+  leds[50] = CRGB::Red;
+  leds[29] = CRGB::Red;
+  leds[30] = CRGB::Red;
+  leds[36] = CRGB::Red;
+  leds[51] = CRGB::Red;
+  leds[57] = CRGB::Red;
+  leds[58] = CRGB::Red;
+  leds[59] = CRGB::Red;
+  leds[60] = CRGB::Red;
+  leds[61] = CRGB::Red;
+  leds[62] = CRGB::Red;
+  leds[14] = CRGB::Red;
+  leds[43] = CRGB::Red;
+  leds[44] = CRGB::Red;
+  leds[67] = CRGB::Red;
+}
+
+void blueBorder() {
+
+  // startup tasks
+  if (effectInit == false) {
+    effectInit = true;
+    fillAll(CRGB(50, 60, 50));
+    effectDelay = 50;
+    fadingActive = true;
+  }
+
+  leds[0] = CRGB::Blue;
+  leds[1] = CRGB::Blue;
+  leds[2] = CRGB::Blue;
+  leds[3] = CRGB::Blue;
+  leds[4] = CRGB::Blue;
+  leds[5] = CRGB::Blue;
+  leds[6] = CRGB::Blue;
+  leds[7] = CRGB::Blue;
+  leds[8] = CRGB::Blue;
+  leds[9] = CRGB::Blue;
+  leds[10] = CRGB::Blue;
+  leds[11] = CRGB::Blue;
+  leds[12] = CRGB::Blue;
+  leds[13] = CRGB::Blue;
+  leds[21] = CRGB::Blue;
+  leds[37] = CRGB::Blue;
+  leds[50] = CRGB::Blue;
+  leds[67] = CRGB::Blue;
+  leds[66] = CRGB::Blue;
+  leds[65] = CRGB::Blue;
+  leds[64] = CRGB::Blue;
+  leds[63] = CRGB::Blue;
+  leds[50] = CRGB::Blue;
+  leds[22] = CRGB::Blue;
+  leds[29] = CRGB::Blue;
+  leds[30] = CRGB::Blue;
+  leds[36] = CRGB::Blue;
+  leds[51] = CRGB::Blue;
+  leds[57] = CRGB::Blue;
+  leds[58] = CRGB::Blue;
+  leds[59] = CRGB::Blue;
+  leds[60] = CRGB::Blue;
+  leds[61] = CRGB::Blue;
+  leds[62] = CRGB::Blue;
+  leds[14] = CRGB::Blue;
+  leds[43] = CRGB::Blue;
+  leds[44] = CRGB::Blue;
+  leds[67] = CRGB::Blue;
+}
+
+void greenBorder() {
+
+  // startup tasks
+  if (effectInit == false) {
+    effectInit = true;
+    fillAll(CRGB::Black);
+    effectDelay = 50;
+    fadingActive = true;
+  }
+
+  leds[0] = CRGB::Green;
+  leds[1] = CRGB::Green;
+  leds[2] = CRGB::Green;
+  leds[3] = CRGB::Green;
+  leds[4] = CRGB::Green;
+  leds[5] = CRGB::Green;
+  leds[6] = CRGB::Green;
+  leds[7] = CRGB::Green;
+  leds[8] = CRGB::Green;
+  leds[9] = CRGB::Green;
+  leds[10] = CRGB::Green;
+  leds[11] = CRGB::Green;
+  leds[12] = CRGB::Green;
+  leds[13] = CRGB::Green;
+  leds[21] = CRGB::Green;
+  leds[37] = CRGB::Green;
+  leds[50] = CRGB::Green;
+  leds[67] = CRGB::Green;
+  leds[66] = CRGB::Green;
+  leds[65] = CRGB::Green;
+  leds[64] = CRGB::Green;
+  leds[63] = CRGB::Green;
+  leds[50] = CRGB::Green;
+  leds[22] = CRGB::Green;
+  leds[29] = CRGB::Green;
+  leds[30] = CRGB::Green;
+  leds[36] = CRGB::Green;
+  leds[51] = CRGB::Green;
+  leds[57] = CRGB::Green;
+  leds[58] = CRGB::Green;
+  leds[59] = CRGB::Green;
+  leds[60] = CRGB::Green;
+  leds[61] = CRGB::Green;
+  leds[62] = CRGB::Green;
+  leds[14] = CRGB::Green;
+  leds[43] = CRGB::Green;
+  leds[44] = CRGB::Green;
+  leds[67] = CRGB::Green;
+}
+
+// Smoothly falling white dots
+void snow() {
+
+  static unsigned int snowCols[kMatrixWidth] = {0};
+
+  // startup tasks
+  if (effectInit == false) {
+    effectInit = true;
+    effectDelay = 20;
+    fadingActive = true;
+  }
+
+  CRGB snowColor = CRGB::White;
+
+  FastLED.clear();
+
+  for (byte i = 0; i < kMatrixWidth; i++) {
+    if (snowCols[i] > 0) {
+      snowCols[i] += random(4, 16);
+    } else {
+      if (random8(0, 100) == 0) snowCols[i] = 1;
+    }
+    byte tempY = snowCols[i] >> 8;
+    byte tempRem = snowCols[i] & 0xFF;
+    if (tempY <= kMatrixHeight) leds[XY(i, tempY - 1)] = snowColor % dim8_raw(255 - tempRem);
+    if (tempY < kMatrixHeight) leds[XY(i, tempY)] = snowColor % dim8_raw(tempRem);
+    if (tempY > kMatrixHeight) snowCols[i] = 0;
+  }
+}
+
+#define rainDir4 0
+void rainDown2() {
+
+  // startup tasks
+  if (effectInit == false) {
+    effectInit = true;
+    effectDelay = 60;
+    fadingActive = true;
+  }
+
+  static uint8_t hue = 0;
+  CRGBPalette16 palette = CloudColors_p;
+
+  scrollArray2(rainDir4);
+  byte randPixel = random8(kMatrixWidth);
+  for (byte x = 0; x < kMatrixWidth; x++) {
+    leds[XY(x, (kMatrixHeight - 1) * rainDir4)] = CRGB::Black;
+  }
+  leds[XY(randPixel, (kMatrixHeight - 1)*rainDir4)] = ColorFromPalette(palette, 240, 240);
+}
+
+#define rainDir2 1
+void sideRain2() {
+
+  // startup tasks
+  if (effectInit == false) {
+    effectInit = true;
+    effectDelay = 30;
+    fadingActive = true;
+  }
+
+  scrollArray(rainDir2);
+  byte randPixel = random8(kMatrixHeight);
+  for (byte y = 0; y < kMatrixHeight; y++) leds[XY((kMatrixWidth - 1) * rainDir2, y)] = CRGB::Black;
+  leds[XY((kMatrixWidth - 1)*rainDir2, randPixel)] = CHSV(cycleHue, 255, 255);
+
+}
+
+#define rainDir4 0
+void rainDown() {
+
+  // startup tasks
+  if (effectInit == false) {
+    effectInit = true;
+    effectDelay = 30;
+    fadingActive = true;
+  }
+
+  static uint8_t hue = 0;
+
+  scrollArray2(rainDir4);
+  byte randPixel = random8(kMatrixWidth);
+  for (byte x = 0; x < kMatrixWidth; x++) {
+    leds[XY(x, (kMatrixHeight - 1) * rainDir4)] = CRGB::Black;
+  }
+  leds[XY(randPixel, (kMatrixHeight - 1)*rainDir4)] = CHSV(cycleHue, 255, 255);
+}
+
+#define rainDir3 1
+void rainUp() {
+  // startup tasks
+  if (effectInit == false) {
+    effectInit = true;
+    effectDelay = 30;
+    currentPalette = CloudColors_p;
+    fadingActive = true;
+  }
+
+  static uint8_t hue = 0;
+
+  scrollArray2(rainDir3);
+  byte randPixel = random8(kMatrixWidth);
+  for (byte x = 0; x < kMatrixWidth; x++) {
+    leds[XY(x, (kMatrixHeight - 1) * rainDir3)] = CRGB::Black;
+  }
+  // leds[XY(randPixel, (kMatrixHeight - 1)*rainDir3)] = CHSV(cycleHue, 255, 255);
+  leds[XY(randPixel, (kMatrixHeight - 1)*rainDir3)] = ColorFromPalette(currentPalette, 240, 255);
+}
+
+// leds run around the periphery of the shades, changing color every go 'round
+// modified from code by @terrag42
+void shadesOutline() {
+  static boolean erase = false;
+  static uint8_t x, y = 0;
+  static uint8_t currentColor = 0;
+  //startup tasks
+  if (effectInit == false) {
+    effectInit = true;
+    erase = false;
+    x = 0;
+    effectDelay = 15;
+    FastLED.clear();
+    currentPalette = RainbowColors_p;
+    fadingActive = true;
+  }
+
+  const uint8_t OutlineTable[] = {
+    0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 43,
+    44, 67, 66, 65, 64, 63, 50, 37, 21, 22, 36, 51, 62, 61, 60, 59,
+    58, 57, 30, 29
+  };
+  leds[OutlineTable[x]] = currentPalette[currentColor];
+  if (erase)
+    leds[OutlineTable[x]] = CRGB::Black;
+  x++;
+  if (x == (sizeof(OutlineTable))) {
+    erase = !erase;
+    x = 0;
+    currentColor += random8(3, 6);
+    if (currentColor > 15) currentColor -= 16;
+  }
+}
+
+void shadesOutline2() {
+  static boolean erase = false;
+  static uint8_t x, y, z = 0;
+  static uint8_t currentColor = 0;
+  //startup tasks
+  if (effectInit == false) {
+    effectInit = true;
+    erase = false;
+    x = 0;
+    y = 0;
+    z = 0;
+    effectDelay = 15;
+    FastLED.clear();
+    currentPalette = RainbowColors_p;
+    fadingActive = true;
+  }
+  const uint8_t OutlineTable[] = {
+    0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 43,
+    44, 67, 66, 65, 64, 63, 50, 37, 21, 22, 36, 51, 62, 61, 60, 59,
+    58, 57, 30, 29
+  };
+  const uint8_t OutlineTable2[] = {
+    23, 24, 25, 26, 27, 28, 31, 56, 55, 54, 53, 52, 35, 34, 33, 32
+  };
+  const uint8_t OutlineTable3[] = {
+    20, 19, 18, 17, 16, 15, 42, 45, 46, 47, 48, 49, 38, 39, 40, 41
+  };
+
+  leds[OutlineTable[x]] = currentPalette[currentColor];
+  if (erase)
+    leds[OutlineTable[x]] = currentPalette[currentColor];
+  x++;
+  if (x == (sizeof(OutlineTable))) {
+    erase = !erase;
+    x = 0;
+    currentColor += random8(3, 6);
+    if (currentColor > 15) currentColor -= 16;
+  }
+
+  leds[OutlineTable2[y]] = currentPalette[currentColor];
+  if (erase)
+    leds[OutlineTable2[y]] = currentPalette[currentColor];
+  y++;
+  if (y == (sizeof(OutlineTable2))) {
+    erase = !erase;
+    y = 0;
+    //    currentColor += random8(3, 3);
+    //     if (currentColor > 6) currentColor -= 7;
+  }
+
+  leds[OutlineTable3[z]] = currentPalette[currentColor];
+  if (erase)
+    leds[OutlineTable3[z]] = currentPalette[currentColor];
+  z++;
+  if (z == (sizeof(OutlineTable3))) {
+    erase = !erase;
+    z = 0;
+    //    currentColor += random8(1, 1);
+    //    if (currentColor > 6) currentColor -= 7;
+  }
+}
+
+void shadesOutline3() {
+  static boolean erase = false;
+  static uint8_t x, y, z = 0;
+  static uint8_t currentColor = 0;
+  //startup tasks
+  if (effectInit == false) {
+    effectInit = true;
+    erase = false;
+    x = 0;
+    y = 0;
+    z = 0;
+    effectDelay = 15;
+    FastLED.clear();
+    // selectRandomPalette();
+    currentPalette = RainbowColors_p;
+    fadingActive = true;
+  }
+
+  const uint8_t OutlineTable[] = {
+    6, 5, 4, 3, 2, 1, 0, 29, 30, 57, 58, 59, 60, 61, 62, 51, 36, 22, 23, 24, 25, 26, 27, 28, 31, 56, 55, 54, 53, 52, 35, 34, 33, 32, 31
+  };
+  const uint8_t OutlineTable2[] = {
+    7, 8, 9, 10, 11, 12, 13, 14, 43, 44, 67, 66, 65, 64, 63, 50, 37, 21, 20, 19, 18, 17, 16, 15, 42, 45, 46, 47, 48, 49, 38, 39, 40, 41
+  };
+
+  leds[OutlineTable[x]] = currentPalette[currentColor];
+  leds[OutlineTable2[y]] = currentPalette[currentColor];
+  if (erase)
+    leds[OutlineTable[x]] = currentPalette[currentColor];
+  leds[OutlineTable2[y]] = currentPalette[currentColor];
+  x++;
+  y++;
+  if (x == (sizeof(OutlineTable)) || y == (sizeof(OutlineTable2))) {
+    erase = !erase;
+    x = 0;
+    y = 0;
+    currentColor += random8(3, 6);
+    if (currentColor > 15) currentColor -= 16;
+  }
+}
+// Crossfading alternate colors
+DEFINE_GRADIENT_PALETTE( outline_gp) {
+  0,   0,   35,  0,
+  0, 255,   0,  0,
+  255,   0,   0,  0,
+  0,   0, 255,  0,
+  255,   0,   0,  0
+};
+
+void shadesOutline4() {
+  static boolean erase = false;
+  static uint8_t x, y, z = 0;
+  static uint8_t currentColor = 0;
+  //startup tasks
+  if (effectInit == false) {
+    effectInit = true;
+    erase = false;
+    x = 0;
+    y = 0;
+    z = 0;
+    effectDelay = 15;
+    FastLED.clear();
+    // selectRandomPalette();
+    // currentPalette = RainbowColors_p;
+    currentPalette = outline_gp;
+    fadingActive = true;
+  }
+  const uint8_t OutlineTable[] = {
+    30, 31, 27, 2, 26, 33, 54, 60, 53, 35, 36, 37, 38, 18, 11, 17, 40, 47, 65, 46, 42, 43
+  };
+
+  //  const uint8_t OutlineTable[] = {
+  //   29,30,57,58,59,55,32,27,1,2,3,25,34,53,61,62,51,36,23,5,6,7,8,20,37,50,63,64,48,39,18,10,11,12,16,41,46,66,67,44,43,14
+  //  };
+  //  const uint8_t OutlineTable2[] = {
+  //    7,8,9,10,11,12,13,14,43,44,67,66,65,64,63,50,37,21,20,19,18,17,16,15,42,45,46,47,48,49,38,39,40,41
+  //  };
+  //
+  leds[OutlineTable[x]] = currentPalette[currentColor];
+  //  leds[OutlineTable2[y]] = currentPalette[currentColor];
+  if (erase)
+    leds[OutlineTable[x]] = currentPalette[currentColor];
+  //    leds[OutlineTable2[y]] = currentPalette[currentColor];
+  x++;
+  //  y++;
+  // if (x == (sizeof(OutlineTable)) || y == (sizeof(OutlineTable2))) {
+  if (x == (sizeof(OutlineTable))) {
+    erase = !erase;
+    x = 0;
+    // y = 0;
+    currentColor += random8(3, 6);
+    if (currentColor > 15) currentColor -= 16;
+  }
+}
+// Display bursts of sparks
+void fireworks() {
+
+  byte sparksDone = 0;
+  static int sparkLife = 50;
+  static boolean boom = false;
+
+  // startup tasks
+  if (effectInit == false) {
+    effectInit = true;
+    effectDelay = 5;
+    gSkyburst = 1;
+    fadingActive = true;
+  }
+  if (boom) {
+    FastLED.clear();
+    boom = false;
+  } else {
+    fadeAll(40);
+  }
+  if (sparkLife > 0) sparkLife--;
+
+  for ( byte b = 0; b < NUM_SPARKS; b++) {
+    if (sparkLife <= 0) gSparks[b].show = 0;
+    gSparks[b].Move();
+    gSparks[b].Draw();
+    sparksDone += gSparks[b].show;
+  }
+
+  if (sparksDone == 0 && beatDetect()) gSkyburst = 1;
+  //Serial.println(sparksDone);
+
+  if ( gSkyburst) {
+    effectDelay = 5;
+    sparkLife = random(16, 150);
+    CRGB color;
+    hsv2rgb_rainbow( CHSV( random8(), 255, 255), color);
+    accum88 sx = random(127 - 64, 127 + 64) << 8;
+    accum88 sy = random(127 - 16, 127 + 16) << 8;
+    for ( byte b = 0; b < NUM_SPARKS; b++) {
+      gSparks[b].Skyburst(sx, sy, 0, color);
+    }
+    gSkyburst = 0;
+    sparksDone = 0;
+    fillAll(CRGB::Gray);
+    boom = true;
+  }
+}
+
 // Triple Sine Waves
 void threeSine() {
 
@@ -15,6 +846,7 @@ void threeSine() {
   if (effectInit == false) {
     effectInit = true;
     effectDelay = 20;
+    fadingActive = true;
   }
 
   // Draw one frame of the animation into the LED array
@@ -30,9 +862,7 @@ void threeSine() {
       leds[XY(x, y)] = CRGB(255 - sinDistanceR, 255 - sinDistanceG, 255 - sinDistanceB);
     }
   }
-
   sineOffset++; // byte will wrap from 255 to 0, matching sin8 0-255 cycle
-
 }
 
 
@@ -46,6 +876,7 @@ void plasma() {
   if (effectInit == false) {
     effectInit = true;
     effectDelay = 10;
+    fadingActive = true;
   }
 
   // Calculate current center of plasma pattern (can be offscreen)
@@ -59,12 +890,9 @@ void plasma() {
       leds[XY(x, y)] = CHSV(color, 255, 255);
     }
   }
-
   offset++; // wraps at 255 for sin8
   plasVector += 16; // using an int for slower orbit (wraps at 65536)
-
 }
-
 
 // Scanning pattern left/right, uses global hue cycle
 void rider() {
@@ -76,6 +904,7 @@ void rider() {
     effectInit = true;
     effectDelay = 5;
     riderPos = 0;
+    fadingActive = true;
   }
 
   // Draw one frame of the animation into the LED array
@@ -88,11 +917,8 @@ void rider() {
       leds[XY(x, y)] = riderColor;
     }
   }
-
   riderPos++; // byte wraps to 0 at 255, triwave8 is also 0-255 periodic
-
 }
-
 
 // Shimmering noise, uses global hue cycle
 void glitter() {
@@ -101,6 +927,7 @@ void glitter() {
   if (effectInit == false) {
     effectInit = true;
     effectDelay = 15;
+    fadingActive = true;
   }
 
   // Draw one frame of the animation into the LED array
@@ -109,9 +936,7 @@ void glitter() {
       leds[XY(x, y)] = CHSV(cycleHue, 255, random8(5) * 63);
     }
   }
-
 }
-
 
 // Fills saturated colors into the array from alternating directions
 void colorFill() {
@@ -128,8 +953,8 @@ void colorFill() {
     currentRow = 0;
     currentDirection = 0;
     currentPalette = RainbowColors_p;
+    fadingActive = true;
   }
-
   // test a bitmask to fill up or down when currentDirection is 0 or 2 (0b00 or 0b10)
   if (!(currentDirection & 1)) {
     effectDelay = 45; // slower since vertical has fewer pixels
@@ -161,8 +986,6 @@ void colorFill() {
     if (currentDirection > 3) currentDirection = 0;
     effectDelay = 300; // wait a little bit longer after completing a fill
   }
-
-
 }
 
 // Emulate 3D anaglyph glasses
@@ -172,6 +995,7 @@ void threeDee() {
   if (effectInit == false) {
     effectInit = true;
     effectDelay = 50;
+    fadingActive = true;
   }
 
   for (byte x = 0; x < kMatrixWidth; x++) {
@@ -185,10 +1009,8 @@ void threeDee() {
       }
     }
   }
-
   leds[XY(6, 0)] = CRGB::Black;
   leds[XY(9, 0)] = CRGB::Black;
-
 }
 
 // Random pixels scroll sideways, uses current hue
@@ -199,6 +1021,7 @@ void sideRain() {
   if (effectInit == false) {
     effectInit = true;
     effectDelay = 30;
+    fadingActive = true;
   }
 
   scrollArray(rainDir);
@@ -217,6 +1040,7 @@ void confetti() {
     effectInit = true;
     effectDelay = 10;
     selectRandomPalette();
+    fadingActive = true;
   }
 
   // scatter random colored pixels at several random coordinates
@@ -224,7 +1048,6 @@ void confetti() {
     leds[XY(random16(kMatrixWidth), random16(kMatrixHeight))] = ColorFromPalette(currentPalette, random16(255), 255); //CHSV(random16(255), 255, 255);
     random16_add_entropy(1);
   }
-
 }
 
 
@@ -237,6 +1060,7 @@ void slantBars() {
   if (effectInit == false) {
     effectInit = true;
     effectDelay = 5;
+    fadingActive = true;
   }
 
   for (byte x = 0; x < kMatrixWidth; x++) {
@@ -244,9 +1068,7 @@ void slantBars() {
       leds[XY(x, y)] = CHSV(cycleHue, 255, quadwave8(x * 32 + y * 32 + slantPos));
     }
   }
-
   slantPos -= 4;
-
 }
 
 
@@ -271,6 +1093,7 @@ void scrollText(byte message, byte style, CRGB fgColor, CRGB bgColor) {
     selectFlashString(message);
     loadCharBuffer(loadStringChar(message, currentMessageChar));
     currentPalette = RainbowColors_p;
+    fadingActive = true;
     for (byte i = 0; i < kMatrixWidth; i++) bitBuffer[i] = 0;
   }
 
@@ -287,7 +1110,7 @@ void scrollText(byte message, byte style, CRGB fgColor, CRGB bgColor) {
     for (byte y = 0; y < 5; y++) { // characters are 5 pixels tall
       if (bitRead(bitBuffer[(bitBufferPointer + x) % kMatrixWidth], y) == 1) {
         if (style == RAINBOW) {
-          pixelColor = ColorFromPalette(currentPalette, paletteCycle+y*16, 255);
+          pixelColor = ColorFromPalette(currentPalette, paletteCycle + y * 16, 255);
         } else {
           pixelColor = fgColor;
         }
@@ -309,10 +1132,8 @@ void scrollText(byte message, byte style, CRGB fgColor, CRGB bgColor) {
     }
     loadCharBuffer(nextChar);
   }
-
   bitBufferPointer++;
   if (bitBufferPointer > 15) bitBufferPointer = 0;
-
 }
 
 
@@ -325,10 +1146,12 @@ void scrollTextOne() {
 }
 
 void scrollTextTwo() {
-  scrollText(2, NORMAL, CRGB::Green, CRGB(0,0,8));
+  scrollText(2, RAINBOW, CRGB::Green, CRGB(0, 0, 8));
 }
 
-
+void scrollTextThree() {
+  scrollText(3, NORMAL, CRGB::Green, CRGB(0, 0, 8));
+}
 
 #define analyzerFadeFactor 5
 #define analyzerScaleFactor 1.5
@@ -338,7 +1161,8 @@ void drawAnalyzer() {
   if (effectInit == false) {
     effectInit = true;
     effectDelay = 10;
-    selectRandomAudioPalette();
+    fadingActive = true;
+    selectRandomPalette();
   }
 
   CRGB pixelColor;
@@ -355,7 +1179,7 @@ void drawAnalyzer() {
       newX = x - 1;
       freqVal = spectrumDecay[newX];
     }
-    
+
     for (byte y = 0; y < kMatrixHeight; y++) {
       if (x > 6) {
         pixelColor = ColorFromPalette(currentPalette, 0, 0);
@@ -375,8 +1199,6 @@ void drawAnalyzer() {
       leds[XY(kMatrixWidth - x - 1, y)] = pixelColor;
     }
   }
-
-
 }
 
 #define VUFadeFactor 5
@@ -386,8 +1208,9 @@ void drawVU() {
   // startup tasks
   if (effectInit == false) {
     effectInit = true;
+    fadingActive = true;
     effectDelay = 10;
-    selectRandomAudioPalette();
+    selectRandomPalette();
   }
 
   CRGB pixelColor;
@@ -412,16 +1235,14 @@ void drawVU() {
       leds[XY(kMatrixWidth - x - 1, y)] = pixelColor;
     }
   }
-
-
 }
-
 
 void RGBpulse() {
 
   // startup tasks
   if (effectInit == false) {
     effectInit = true;
+    fadingActive = true;
     effectDelay = 1;
   }
 
@@ -433,19 +1254,256 @@ void RGBpulse() {
 
     switch (RGBcycle) {
       case 0:
-        fillAll(CRGB::Red);
+        fillAll(CRGB::OrangeRed);
         break;
       case 1:
         fillAll(CRGB::Lime);
         break;
       case 2:
-        fillAll(CRGB::Blue);
+        fillAll(CRGB::MediumBlue);
         break;
     }
 
     RGBcycle++;
     if (RGBcycle > 2) RGBcycle = 0;
   }
-
 }
+
+
+void whitepulse() {
+
+  // startup tasks
+  if (effectInit == false) {
+    effectInit = true;
+    fadingActive = true;
+    effectDelay = 1;
+  }
+
+  fadeAll(2);
+
+  if (beatDetect()) {
+
+    fillAll(CHSV(1, 0, 255));
+  }
+}
+
+
+
+const byte bitmaps[12][5] =
+{
+  {
+    // 0 - ghosts
+    0b00111000,
+    0b01111100,
+    0b01010100,
+    0b01111100,
+    0b01010100
+  },
+  // 1 - circles
+  {
+    0b00111000,
+    0b01000100,
+    0b01000100,
+    0b01000100,
+    0b00111000
+  },
+  // 2- up arrow
+  {
+    0b00010000,
+    0b00111000,
+    0b01111100,
+    0b00111000,
+    0b00111000
+  },
+  // 3 - down arrow
+  {
+    0b00111000,
+    0b00111000,
+    0b01111100,
+    0b00111000,
+    0b00010000
+  },
+  // 4 - squares
+  {
+    0b01111100,
+    0b01000100,
+    0b01000100,
+    0b01000100,
+    0b01111100
+  },
+  // 5 - crosses
+  {
+    0b00010000,
+    0b00010000,
+    0b01111100,
+    0b00010000,
+    0b00010000
+  },
+  // 6 - Hearts
+  {
+    0b01101100,
+    0b11111110,
+    0b01111100,
+    0b00111000,
+    0b00010000
+  },
+  // 7 - diamonds
+  {
+    0b00010000,
+    0b00101000,
+    0b01000100,
+    0b00101000,
+    0b00010000
+  },
+  // 8 - crosses
+  {
+    0b01000100,
+    0b00101000,
+    0b00010000,
+    0b00101000,
+    0b01000100
+  },
+  // 9 - hash
+  {
+    0b00101000,
+    0b01111100,
+    0b00101000,
+    0b01111100,
+    0b00101000
+  },
+  // 10 - ^ ^
+  {
+    0b00010000,
+    0b00101000,
+    0b01000100,
+    0b00000000,
+    0b00000000
+  }
+};
+
+
+void iconpulse() {
+
+  //static byte offset = 0;
+  static byte icontodisplay = 0;
+
+  // startup tasks
+  if (effectInit == false) {
+    effectInit = true;
+    fadingActive = true;
+    effectDelay = 1;
+    //offset = 0;
+  }
+
+
+  fadeAll(1);
+
+  if (beatDetect()) {
+
+    byte icontodisplay = random8(12);
+    byte iconcolour = random8();
+
+    //    for(byte i = 0; i < 40; i++)
+    //    {
+    //      leds[XY(i % 8, i / 8 )] = CHSV(iconcolour, 255, rgbshades_icons_data[icontodisplay][i]);
+    //      leds[XY(15 - (i % 8), i / 8 )] = CHSV(iconcolour, 255, rgbshades_icons_data[icontodisplay][i]);
+    //    }
+
+    CRGB currentColor;
+    for (byte y = 0; y < 5; y++) {
+      for (byte x = 0; x < 8; x++) {
+        if (bitRead(bitmaps[icontodisplay][y], 7 - x) == 1) {
+          currentColor = CHSV(iconcolour, 255, 255);
+        } else {
+          currentColor = CRGB::Black;
+        }
+        leds[XY(x, y)] = currentColor;
+        leds[XY(15 - x, y)] = currentColor;
+      }
+    }
+  }
+}
+
+
+#define vuScrollDir 0
+#define vuScrollFadeFactor 15
+#define vuScrollScaleFactor 3
+void scrollingVU() {
+
+  // startup tasks
+  if (effectInit == false) {
+    effectInit = true;
+    effectDelay = 60;
+    fadingActive = true;
+  }
+
+  const float yScale = 255.0 / kMatrixHeight; // = 51
+  CRGB pixelColor;
+  float specCombo = (spectrumValue[0] + spectrumValue[1] + spectrumValue[2] + spectrumValue[3]) / 4.0; // Average of 1st 4 bands
+
+  scrollArray(vuScrollDir);
+
+  for (byte y = 0; y < kMatrixHeight; y++) {
+    int senseValue = specCombo / vuScrollScaleFactor - yScale * y;  // 0<specCombo<4095 / 3 - 51 * 0 to 4
+    int pixelBrightness = senseValue * vuScrollFadeFactor;
+    if (pixelBrightness > 255) pixelBrightness = 255;
+    if (pixelBrightness < 0) pixelBrightness = 0;
+    pixelColor = CHSV(cycleHue, 255, pixelBrightness); // use huecycle
+    leds[XY((kMatrixWidth - 1)*vuScrollDir, (kMatrixHeight - 1) - y)] = pixelColor; // paint random pixel with cyclehue colour
+  }
+}
+
+
+void scrollingVUdot() {
+
+  // startup tasks
+  if (effectInit == false) {
+    effectInit = true;
+    effectDelay = 30;
+    fadingActive = true;
+  }
+
+  const float yScale = 255.0 / kMatrixHeight; // = 51
+  CRGB pixelColor;
+  float specCombo = (spectrumValue[0] + spectrumValue[1] + spectrumValue[2] + spectrumValue[3]) / 4.0;  // Average of 1st 4 bands
+
+  scrollArray(vuScrollDir);
+  for (byte y = 0; y < kMatrixHeight; y++) {
+    pixelColor = CHSV(255, 255, 0); // black
+    leds[XY((kMatrixWidth - 1)*vuScrollDir, y)] = pixelColor; // paint pixel with black
+  }
+
+  int vuYPixel = map(specCombo, 0, 3500, 0, kMatrixHeight - 1); // maps the 12 bit size of specCombo to the size of the matrix height/Y
+  pixelColor = CHSV(cycleHue, 255, 255); // use huecycle
+  leds[XY((kMatrixWidth - 1)*vuScrollDir, (kMatrixHeight - 1) - vuYPixel)] = pixelColor; // paint random pixel with cyclehue colour
+}
+
+#define barcodeScrollDir 1
+void beatBarcode() {
+
+  // startup tasks
+  if (effectInit == false) {
+    effectInit = true;
+    effectDelay = 10;
+    fadingActive = true;
+  }
+
+  CRGB pixelColor;
+  scrollArray(barcodeScrollDir);
+
+  if (beatDetect()) {
+    for (byte y = 0; y < kMatrixHeight; y++) {
+      pixelColor = CHSV(cycleHue, 255, 255); // use huecycle
+      leds[XY((kMatrixWidth - 1)*barcodeScrollDir, y)] = pixelColor; // paint random pixel with cyclehue colour
+    }
+  }
+  else {
+    for (byte y = 0; y < kMatrixHeight; y++) {
+      pixelColor = CHSV(cycleHue, 255, 0); // use huecycle
+      leds[XY((kMatrixWidth - 1)*barcodeScrollDir, y)] = pixelColor; // paint random pixel with cyclehue colour
+    }
+  }
+}
+
+
 

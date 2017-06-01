@@ -1,7 +1,10 @@
+#include <Arduino.h>
+
 //   RGB Shades Audio Demo Code - REQUIRES MSGEQ7 AUDIO SENSOR
 //   Copyright (c) 2015 macetech LLC
 //   This software is provided under the MIT License (see license.txt)
 //   Special credit to Mark Kriegsman for XY mapping code
+
 //
 //   Use Version 3.0 or later https://github.com/FastLED/FastLED
 //   ZIP file https://github.com/FastLED/FastLED/archive/master.zip
@@ -63,31 +66,68 @@
 #include "XYmap.h"
 #include "utils.h"
 #include "audio.h"
+#include "FireworksXY.h"
+#include "Torch.h"
 #include "effects.h"
 #include "buttons.h"
+//#include "icons.h"
 
 // list of functions that will be displayed
-functionList effectListAudio[] = {drawVU,
-                                  RGBpulse,
-                                  drawAnalyzer
-                                 };
+functionList effectListAudio[] = {
+  drawVU,
+  RGBpulse,
+  drawAnalyzer
+};
 
-functionList effectListNoAudio[] = {threeSine,
-                                    drawVU,
-                                    threeDee,
-                                    scrollTextZero,
-                                    plasma,
-                                    RGBpulse,
-                                    confetti,
-                                    rider,
-                                    scrollTextOne,
-                                    glitter,
-                                    drawAnalyzer,
-                                    slantBars,
-                                    scrollTextTwo,
-                                    colorFill,
-                                    sideRain
-                                   };
+functionList effectListNoAudio[] = {
+  iconpulse, //random coloured icons pulse to audio beat detection
+  drawVU, //oob DrawVU
+  RGBpulse, //oob rgb pusle
+  drawAnalyzer, //oob analyser
+  fireworks, // awesome fireworks with strobe flash on explosion. Beat synced,
+  whitepulse, // Pulse all LEDs white on beat detection
+  scrollingVU, // Scroll a VU
+  beatBarcode, // Wipes a bar on every beat detect
+  scrollingVUdot //WIP scrolling VU dot display
+    /*
+  Fire2012WithPalette, //fire effect
+  torch, //different fire effect with sparks
+  checkerboard, //red-green checkerboard effect
+  bpm, //nice left-right animation with fixed palette. Can it be synched with beat
+  threeSine, //oob three sine
+  plasma, //oob plasma
+  spinPlasma, //nice spinning version of plasma. random palette... looks good w some palettes but not all (dont like blue-white palette)
+  radiate, //nice centre based pattern (concentric colour shift)
+  radiate2, //love left-right right-left version of radiate
+  confetti, //oob
+  rider, // oob
+  glitter, //oob
+  colorRotation, //fairly boring all pixl same colour rainbow cycle
+  slantBars, //oob slantBars
+  colorFill, //oob colourfil
+  slantBars2, //slower coloufill
+  sideRain, //oob sideRain
+  sideRain2, //dir reversed rain
+  rainUp, //white rain up (like bubbles)
+  rainDown, //rainbow rain down
+  rainDown2, // slow white rain down
+  snow,  //v slow white falling particles with fadng trails
+  shadesOutline, //colour trace around outermost pixels
+  shadesOutline2, //colour trace to fill shadesOutline2 follwing asymmetric pattern
+  shadesOutline3, // slightly diff pattern/colours
+  shadesOutline4, //symmetric spiral pattern fill
+  blueSnake, // heartbeat cardiograph
+  blueBorder, //wipe fill blue
+  redBorder, // blueborder white fill
+  redBorder2, // red jail bars pattern and red Border
+  greenBorder, // solid unchanging red Border
+  threeDee,  //3d glasses
+  scrollTextZero, //red text message 0
+  scrollTextOne, //rainbow text message 1
+  scrollTextTwo, //blue background rainbow text message 2
+  scrollTextThree, //blue background green text message 3
+  */
+};
 
 
 byte numEffects;
@@ -197,8 +237,3 @@ void loop()
   FastLED.show(); // send the contents of the led memory to the LEDs
 
 }
-
-
-
-
-
