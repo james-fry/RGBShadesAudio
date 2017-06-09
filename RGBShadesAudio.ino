@@ -71,64 +71,114 @@
 #include "effects.h"
 #include "buttons.h"
 //#include "icons.h"
+//#include "graphicframes.h"     // bitmap graphics
 
 // list of functions that will be displayed
 functionList effectListAudio[] = {
-  drawVU,
-  RGBpulse,
-  drawAnalyzer
+  iconPulse,
+  drawVU, //oob DrawVU
+  RGBpulse, //**oob rgb pusle
+  drawAnalyzer, //**oob analyser
+  fireworks, // **awesome fireworks with strobe flash on explosion. Beat synced,
+  whitePulse, //** Pulse whole matrix white on a beat
+  scrollingVU, //** scrolling VU meter
+  beatBarcode, //** wipes a bar across matrix on each beat
+  monoIconPulse,
+  drawMixedAnalyzer
 };
+
+/*
+functionList effectListNoAudio[] = {
+  iconPulse,
+  drawVU, //oob DrawVU
+  RGBpulse, //**oob rgb pusle
+  drawAnalyzer, //**oob analyser
+  fireworks, // **awesome fireworks with strobe flash on explosion. Beat synced,
+  whitePulse, //** Pulse whole matrix white on a beat
+  scrollingVU, //** scrolling VU meter
+  beatBarcode, //** wipes a bar across matrix on each beat
+  //scrollingVUdot,  // does not work very well...
+  g17Logo, // **G-17 logo on scrolling starfield
+  monoIconPulse,
+  //drawWideAnalyzer, // Draws analyser across full width of matrix
+  drawMixedAnalyzer, // ** Draws an analyser mixing up the freq bins
+  rollingEyes,
+  //iconStrobe, //not a great effect :(
+  //Fire2012WithPalette, //fire effect
+  torch, // **different fire effect with sparks
+  bpm, //**nice left-right animation with fixed palette. Can it be synched with beat
+  threeSine, //**oob three sine
+  plasma, //**oob plasma
+  spinPlasma, //**nice spinning version of plasma. random palette... looks good w some palettes but not all (dont like blue-white palette)
+  radiate, //**nice centre based pattern (concentric colour shift)
+  radiate2, //**love left-right right-left version of radiate
+  confetti, //**oob
+  rider, // **oob
+  glitter, //**oob prefer over confetti
+  slantBars, //**oob slantBars
+  colorFill, //**oob colourfil
+//  slantBars2, //slower slantBars but not as good (lot of pwm artefacts)
+  sideRain, //**oob sideRain
+  sideRain2, //**dir reversed rain
+  rainUp, //**white rain up (like bubbles)
+  rainDown, //**rainbow rain down
+//  rainDown2, // slow white rain down
+//  snow,  //v slow white falling particles with fadng trails
+  shadesOutline, //colour trace around outermost pixels, color random?
+//  shadesOutline2, //colour trace to fill shadesOutline2 follwing asymmetric pattern
+//  shadesOutline3, // slightly diff pattern/colours
+  shadesOutline4, //symmetric spiral pattern fill
+  // heartbeat cardiograph
+//  blueSnake, //wipe fill blue
+//  blueBorder, // blueborder white fill
+//  redBorder, // red jail bars pattern and red Border
+//  redBorder2, 
+//  greenBorder, // solid unchanging red Border
+  threeDee,  //3d glasses
+  scrollTextZero, //red text message 0 - CHOON!
+  scrollTextOne, //rainbow text message 1 - Glasto 2017!
+  scrollTextTwo, //blue background rainbow text message 2 - WTF?
+  scrollTextThree //blue background green text message 3
+};
+*/
 
 functionList effectListNoAudio[] = {
-  iconpulse, //random coloured icons pulse to audio beat detection
+  beatBarcode, //** wipes a bar across matrix on each beat
+  bpm, //**nice left-right animation with fixed palette. Can it be synched with beat
+  colorFill, //**oob colourfil
+  confetti, //**oob
+  drawAnalyzer, //**oob analyser
+  rainDown, //**rainbow rain down
   drawVU, //oob DrawVU
-  RGBpulse, //oob rgb pusle
-  drawAnalyzer, //oob analyser
-  fireworks, // awesome fireworks with strobe flash on explosion. Beat synced,
-  whitepulse, // Pulse all LEDs white on beat detection
-  scrollingVU, // Scroll a VU
-  beatBarcode, // Wipes a bar on every beat detect
-  scrollingVUdot //WIP scrolling VU dot display
-    /*
-  Fire2012WithPalette, //fire effect
-  torch, //different fire effect with sparks
-  checkerboard, //red-green checkerboard effect
-  bpm, //nice left-right animation with fixed palette. Can it be synched with beat
-  threeSine, //oob three sine
-  plasma, //oob plasma
-  spinPlasma, //nice spinning version of plasma. random palette... looks good w some palettes but not all (dont like blue-white palette)
-  radiate, //nice centre based pattern (concentric colour shift)
-  radiate2, //love left-right right-left version of radiate
-  confetti, //oob
-  rider, // oob
-  glitter, //oob
-  colorRotation, //fairly boring all pixl same colour rainbow cycle
-  slantBars, //oob slantBars
-  colorFill, //oob colourfil
-  slantBars2, //slower coloufill
-  sideRain, //oob sideRain
-  sideRain2, //dir reversed rain
-  rainUp, //white rain up (like bubbles)
-  rainDown, //rainbow rain down
-  rainDown2, // slow white rain down
-  snow,  //v slow white falling particles with fadng trails
-  shadesOutline, //colour trace around outermost pixels
-  shadesOutline2, //colour trace to fill shadesOutline2 follwing asymmetric pattern
-  shadesOutline3, // slightly diff pattern/colours
-  shadesOutline4, //symmetric spiral pattern fill
-  blueSnake, // heartbeat cardiograph
-  blueBorder, //wipe fill blue
-  redBorder, // blueborder white fill
-  redBorder2, // red jail bars pattern and red Border
-  greenBorder, // solid unchanging red Border
-  threeDee,  //3d glasses
-  scrollTextZero, //red text message 0
-  scrollTextOne, //rainbow text message 1
-  scrollTextTwo, //blue background rainbow text message 2
+  fireworks, // **awesome fireworks with strobe flash on explosion. Beat synced,
+  g17Logo, // **G-17 logo on scrolling starfield
+  glitter, //**oob prefer over confetti
+  iconPulse,
+  plasma, //**oob plasma
+  radiate, //**nice centre based pattern (concentric colour shift)
   scrollTextThree, //blue background green text message 3
-  */
+  shadesOutline, //colour trace around outermost pixels, color random?
+  rainUp, //**white rain up (like bubbles)
+  RGBpulse, //**oob rgb pusle
+  rider, // **oob
+  rollingEyes,
+  scrollingVU, //** scrolling VU meter
+  scrollTextOne, //rainbow text message 1 - Glasto 2017!
+  monoIconPulse,
+  scrollTextTwo, //blue background rainbow text message 2 - WTF?
+  shadesOutline4, //symmetric spiral pattern fill
+  sideRain, //**oob sideRain
+  sideRain2, //**dir reversed rain
+  slantBars, //**oob slantBars
+  spinPlasma, //**nice spinning version of plasma. random palette... looks good w some palettes but not all (dont like blue-white palette)
+  threeDee,  //3d glasses
+  threeSine, //**oob three sine
+  torch, // **different fire effect with sparks
+  whitePulse, //** Pulse whole matrix white on a beat
+  drawMixedAnalyzer, // ** Draws an analyser mixing up the freq bins
+  radiate2, //**love left-right right-left version of radiate
+  scrollTextZero //red text message 0 - CHOON!
 };
-
 
 byte numEffects;
 const byte numEffectsAudio = (sizeof(effectListAudio) / sizeof(effectListAudio[0]));
